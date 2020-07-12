@@ -11,3 +11,5 @@
       2. Install all the dependencies using "npm i" in your terminal
       3. Start by typing "npm run start" in your terminal
       4. Refresh browser after your transaction gets accepted in Metamask
+
+##### For any issues reach out to me at: parv3213@gmail.com
