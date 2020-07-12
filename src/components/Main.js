@@ -20,7 +20,14 @@ class Main extends Component {
 					buyTokens={this.props.buyTokens}
 				/>
 			);
-		else content = <SellForm />;
+		else
+			content = (
+				<SellForm
+					ethBalance={this.props.ethBalance}
+					tokenBalance={this.props.tokenBalance}
+					buyTokens={this.props.buyTokens}
+				/>
+			);
 		return (
 			<div id="content" className="mt-3">
 				<div className="d-flex justify-content-between mb-3">
