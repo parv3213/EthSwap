@@ -83,13 +83,12 @@ class App extends Component {
 			.approve(this.state.ethSwap.address, tokenAmount)
 			.send({ from: this.state.account })
 			.on("transactionHash", (hash) => {
-				this.setState({ loading: false });
-			});
-		this.state.ethSwap.methods
-			.sellTokens(tokenAmount)
-			.send({ from: this.state.account })
-			.on("transactionHash", (hash) => {
-				this.setState({ loading: false });
+				this.state.ethSwap.methods
+					.sellTokens(tokenAmount)
+					.send({ from: this.state.account })
+					.on("transactionHash", (hash) => {
+						this.setState({ loading: false });
+					});
 			});
 	};
 
