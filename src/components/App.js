@@ -77,6 +77,22 @@ class App extends Component {
 			});
 	};
 
+	sellTokens = async (tokenAmount) => {
+		this.setState({ loading: true });
+		this.state.token.methods
+			.approve(this.state.ethSwap.address, tokenAmount)
+			.send({ from: this.state.account })
+			.on("transactionHash", (hash) => {
+				this.setState({ loading: false });
+			});
+		this.state.ethSwap.methods
+			.sellTokens(tokenAmount)
+			.send({ from: this.state.account })
+			.on("transactionHash", (hash) => {
+				this.setState({ loading: false });
+			});
+	};
+
 	// react state
 	constructor(props) {
 		super(props);
@@ -100,7 +116,12 @@ class App extends Component {
 			);
 		else
 			content = (
-				<Main ethBalance={this.state.ethBalance} tokenBalance={this.state.tokenBalance} buyTokens={this.buyTokens} />
+				<Main
+					ethBalance={this.state.ethBalance}
+					tokenBalance={this.state.tokenBalance}
+					buyTokens={this.buyTokens}
+					sellTokens={this.sellTokens}
+				/>
 			);
 		return (
 			<div>

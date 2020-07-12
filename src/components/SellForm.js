@@ -16,10 +16,10 @@ class SellForm extends Component {
 				className="mb-5"
 				onSubmit={(event) => {
 					event.preventDefault();
-					let etherAmount;
-					etherAmount = this.input.value.toString();
-					etherAmount = window.web3.utils.toWei(etherAmount, "Ether");
-					this.props.buyTokens(etherAmount);
+					let tokenAmount;
+					tokenAmount = this.input.value.toString();
+					tokenAmount = window.web3.utils.toWei(tokenAmount, "Ether");
+					this.props.sellTokens(tokenAmount);
 				}}
 			>
 				<div>
