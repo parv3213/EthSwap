@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import Web3 from "web3";
+import Token from "../abis/Token.json";
+import EthSwap from "../abis/EthSwap.json";
 import Navbar from "./Navbar";
 import "./App.css";
 
@@ -11,11 +13,37 @@ class App extends Component {
 
 	async loadBlockchainData() {
 		const web3 = window.web3;
+
+		// get account
 		const accounts = await web3.eth.getAccounts();
 		this.setState({ account: accounts[0] });
+
+		// Set EthSwap balance
 		const ethBalance = await web3.eth.getBalance(this.state.account);
 		this.setState({ ethBalance });
-		console.log(this.state.ethBalance);
+
+		// Load Network ID
+		const networkId = await web3.eth.net.getId();
+
+		// Load Token
+		const tokenData = Token.networks[networkId];
+		if (tokenData) {
+			const token = new web3.eth.Contract(Token.abi, tokenData.address);
+			this.setState({ token });
+			let tokenBalance = await token.methods.balanceOf(this.state.account).call();
+			this.setState({ tokenBalance: tokenBalance.toString() });
+		} else {
+			window.alert("Token Network not detected");
+		}
+
+		// Load EthSwap
+		const ethSwapData = EthSwap.networks[networkId];
+		if (ethSwapData) {
+			const ethSwap = new web3.eth.Contract(EthSwap.abi, ethSwapData.address);
+			this.setState({ ethSwap });
+		} else {
+			window.alert("EthSwap Network not detected");
+		}
 	}
 
 	async loadWeb3() {
@@ -39,6 +67,9 @@ class App extends Component {
 		super(props);
 		this.state = {
 			account: "",
+			token: {},
+			ethSwap: {},
+			tokenBalance: "0",
 			ethBalance: "0",
 		};
 	}
