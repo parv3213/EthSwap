@@ -15,18 +15,14 @@ class App extends Component {
 	async loadBlockchainData() {
 		const web3 = window.web3;
 
-		// get account
 		const accounts = await web3.eth.getAccounts();
 		this.setState({ account: accounts[0] });
 
-		// Set EthSwap balance
 		const ethBalance = await web3.eth.getBalance(this.state.account);
 		this.setState({ ethBalance });
 
-		// Load Network ID
-		const networkId = await web3.eth.net.getId();
-
 		// Load Token
+		const networkId = await web3.eth.net.getId();
 		const tokenData = Token.networks[networkId];
 		if (tokenData) {
 			const token = new web3.eth.Contract(Token.abi, tokenData.address);
@@ -34,7 +30,7 @@ class App extends Component {
 			let tokenBalance = await token.methods.balanceOf(this.state.account).call();
 			this.setState({ tokenBalance: tokenBalance.toString() });
 		} else {
-			window.alert("Token Network not detected");
+			window.alert("Token contract not deployed to detected network.");
 		}
 
 		// Load EthSwap
@@ -43,31 +39,24 @@ class App extends Component {
 			const ethSwap = new web3.eth.Contract(EthSwap.abi, ethSwapData.address);
 			this.setState({ ethSwap });
 		} else {
-			window.alert("EthSwap Network not detected");
+			window.alert("EthSwap contract not deployed to detected network.");
 		}
 
-		// Loading is done, to set loading == false
 		this.setState({ loading: false });
 	}
 
 	async loadWeb3() {
-		// Modern dapp browsers...
 		if (window.ethereum) {
 			window.web3 = new Web3(window.ethereum);
 			await window.ethereum.enable();
-		}
-		// Legacy dapp browsers...
-		else if (window.web3) {
+		} else if (window.web3) {
 			window.web3 = new Web3(window.web3.currentProvider);
-		}
-		// Non-dapp browsers...
-		else {
+		} else {
 			window.alert("Non-Ethereum browser detected. You should consider trying MetaMask!");
 		}
 	}
 
-	// Buy tokens @desc take input some amount of wei
-	buyTokens = async (etherAmount) => {
+	buyTokens = (etherAmount) => {
 		this.setState({ loading: true });
 		this.state.ethSwap.methods
 			.buyTokens()
@@ -77,31 +66,52 @@ class App extends Component {
 			});
 	};
 
-	// react state
+	sellTokens = (tokenAmount) => {
+		this.setState({ loading: true });
+		this.state.token.methods
+			.approve(this.state.ethSwap.address, tokenAmount)
+			.send({ from: this.state.account })
+			.on("transactionHash", (hash) => {
+				this.state.ethSwap.methods
+					.sellTokens(tokenAmount)
+					.send({ from: this.state.account })
+					.on("transactionHash", (hash) => {
+						this.setState({ loading: false });
+					});
+			});
+	};
+
 	constructor(props) {
 		super(props);
 		this.state = {
 			account: "",
 			token: {},
 			ethSwap: {},
-			tokenBalance: "0",
 			ethBalance: "0",
+			tokenBalance: "0",
 			loading: true,
 		};
 	}
 
 	render() {
 		let content;
-		if (this.state.loading)
+		if (this.state.loading) {
 			content = (
 				<p id="loader" className="text-center">
 					Loading...
 				</p>
 			);
-		else
+		} else {
 			content = (
-				<Main ethBalance={this.state.ethBalance} tokenBalance={this.state.tokenBalance} buyTokens={this.buyTokens} />
+				<Main
+					ethBalance={this.state.ethBalance}
+					tokenBalance={this.state.tokenBalance}
+					buyTokens={this.buyTokens}
+					sellTokens={this.sellTokens}
+				/>
 			);
+		}
+
 		return (
 			<div>
 				<Navbar account={this.state.account} />
@@ -109,7 +119,8 @@ class App extends Component {
 					<div className="row">
 						<main role="main" className="col-lg-12 ml-auto mr-auto" style={{ maxWidth: "600px" }}>
 							<div className="content mr-auto ml-auto">
-								{/* <a href="http://www.dappuniversity.com/bootcamp" target="_blank" rel="noopener noreferrer"></a> */}
+								<a href="http://www.dappuniversity.com/bootcamp" target="_blank" rel="noopener noreferrer"></a>
+
 								{content}
 							</div>
 						</main>
